@@ -1,0 +1,88 @@
+import java.net.*;
+import java.io.*;
+
+public class DroneServer {
+    private Map<String, Drone> drones; // to store all the registered drones
+
+    public DroneServer() throws IOException {
+        this.drones = new HashMap<>();
+
+        // Load all previously saved data from existing binary and CSV files in memory
+        loadDronesFromBinaryFile("drones.bin");
+        loadDronesFromCsvFile("drones.csv");
+    }
+
+    public void start() throws IOException {
+        ServerSocket serverSocket = null;
+        boolean listening = true;
+
+        try {
+            serverSocket = new ServerSocket(4444);
+        } catch (IOException e) {
+            System.err.println("Could not listen on port: 4444.");
+            System.exit(-1);
+        }
+
+        while (listening) {
+            new DroneServerThread(serverSocket.accept(), drones).start();
+        }
+
+        serverSocket.close();
+    }
+
+    private void loadDronesFromBinaryFile(String fileName) throws IOException {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(fileName))) {
+            while (true) {
+                Drone drone = (Drone) ois.readObject();
+                drones.put(drone.getId(), drone);
+            }
+        } catch (EOFException e) {
+            // End of file reached
+        } catch (ClassNotFoundException e) {
+            System.err.println("Error loading drone from binary file: " + e.getMessage());
+        }
+    }
+
+    private void loadDronesFromCsvFile(String fileName) throws IOException {
+        try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] tokens = line.split(",");
+                String id = tokens[0];
+                double latitude = Double.parseDouble(tokens[1]);
+                double longitude = Double.parseDouble(tokens[2]);
+                Drone drone = new Drone(id, latitude, longitude);
+                drones.put(id, drone);
+            }
+        }
+    }
+
+    private void saveDroneToBinaryFile(Drone drone, String fileName) throws IOException {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(fileName, true))) {
+            oos.writeObject(drone);
+        }
+    }
+}
+
+class DroneServerThread extends Thread {
+    private Socket socket;
+    private Map<String, Drone> drones;
+
+    public DroneServerThread(Socket socket, Map<String, Drone> drones) {
+        super("DroneServerThread");
+        this.socket = socket;
+        this.drones = drones;
+    }
+
+    public void run() {
+        try (
+            ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+            ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+        ) {
+            // Receive drone registration details
+            String message = (String) in.readObject();
+            if (message.startsWith("REGISTER")) {
+                String[] tokens = message.split(",");
+                String id = tokens[1];
+                double latitude = Double.parseDouble(tokens[2]);
+                double longitude = Double.parseDouble(tokens[
