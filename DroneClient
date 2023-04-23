@@ -1,0 +1,250 @@
+package droneclientproject;
+import com.opencsv.CSVWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*; 
+import java.io.*;
+import java.nio.file.StandardOpenOption;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+
+public class DroneClientProject {
+
+   
+ public static void main(String[] args) 
+    {
+        String drone_operation_choice="1";
+        Scanner sc_choice= new Scanner(System.in);
+        while(drone_operation_choice.equalsIgnoreCase("1") || drone_operation_choice.equalsIgnoreCase("2") || drone_operation_choice.equalsIgnoreCase("3") )
+        {
+        
+        System.out.print(" 1:Register Drone \n 2:Read messages from server \n 3: Send fire alert \n Enter Your drone_operation_choice : ");  
+        drone_operation_choice= sc_choice.nextLine();
+        if(!drone_operation_choice.equalsIgnoreCase("1") && !drone_operation_choice.equalsIgnoreCase("2") && !drone_operation_choice.equalsIgnoreCase("3"))
+        {
+            System.out.println("Enter a valid option.\n");
+        }
+        
+        
+        if(drone_operation_choice.equalsIgnoreCase("1"))
+        {
+            
+            int flagfor_exit=0;
+            int countOfLines=0;
+            
+            
+            while(flagfor_exit==0)
+            {
+            System.out.print("Enter Drone id : ");  
+            String drone_id= sc_choice.nextLine();  
+            System.out.print("Enter Drone name : ");  
+            String drone_name= sc_choice.nextLine();   //reads string   
+            System.out.print("Enter Drone initial position \nX :  ");  
+            String x1= sc_choice.nextLine(); 
+            System.out.print("Y :  ");  
+            String y1= sc_choice.nextLine(); 
+          File file = new File(
+            "D:\\23Term1\\Applied Distributed System\\DroneClientProject\\drone.txt");
+ 
+          
+        BufferedReader buffer_read;
+                try {
+                    buffer_read = new BufferedReader(new FileReader(file));
+               
+        String string_read;
+        
+                try {
+                    while ((string_read = buffer_read.readLine()) != null)
+                    {
+                        countOfLines=1;
+                        String droneidfromfile=string_read.split("##")[0];
+                        String dronenamefromfile=string_read.split("##")[1];
+                        if(droneidfromfile.equalsIgnoreCase(drone_id))
+                        {
+                            System.out.println("Drone id already exists");
+                            flagfor_exit=0;
+                        }
+                        else if(dronenamefromfile.equalsIgnoreCase(drone_name))
+                        {
+                            System.out.println("Drone name already exists");
+                            flagfor_exit=0;
+                        }
+                        else
+                        {
+                            flagfor_exit=1;
+                        }
+                        
+                    }
+                        if(flagfor_exit==1)
+                        {
+                            
+                            String val=drone_id+"##"+drone_name+"##"+x1+"##"+y1+"\n";
+                            
+                            try {
+                                
+                                Files.write(Paths.get("drone.txt"), val.getBytes(), StandardOpenOption.APPEND);
+                                
+                                System.out.println("Drone Registration successfull..");
+                                
+                            }
+                            catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                       } catch (IOException ex) {
+                    Logger.getLogger(DroneClientProject.class.getName()).log(Level.SEVERE, null, ex);
+                }
+        
+        if(countOfLines==0)
+        {
+             
+            String val=drone_id+"##"+drone_name+"##"+x1+"##"+y1+"\n";
+                        try {
+                            Files.write(Paths.get("drone.txt"), val.getBytes(), StandardOpenOption.APPEND);
+                        } catch (IOException ex) {
+                            Logger.getLogger(DroneClientProject.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+            flagfor_exit=1;
+            System.out.println("Registration successfull");
+             
+        }
+         } catch (FileNotFoundException ex) {
+                    Logger.getLogger(DroneClientProject.class.getName()).log(Level.SEVERE, null, ex);
+                }
+  
+          }
+        
+        }
+            
+            
+        if(drone_operation_choice.equalsIgnoreCase("2"))
+        {
+             
+          File file = new File(
+            "D:\\23Term1\\Applied Distributed System\\DroneProject\\dronemessages.txt");
+ 
+        BufferedReader b_reader;
+            try {
+                b_reader = new BufferedReader(new FileReader(file));
+
+        String st;
+              try {
+                  while ((st = b_reader.readLine()) != null)
+                  {
+                      String instruct=st.split("##")[0];
+                      String dronenm=st.split("##")[1];
+                      {
+                          System.out.println("To :"+dronenm+" Message: "+instruct);
+                      }
+                      
+                  }     } catch (IOException ex) {
+                  Logger.getLogger(DroneClientProject.class.getName()).log(Level.SEVERE, null, ex);
+              }
+                    } catch (FileNotFoundException ex) {
+                Logger.getLogger(DroneClientProject.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        
+        //fire 
+        
+        if(drone_operation_choice.equalsIgnoreCase("3"))
+        {
+            int flagfor_exit=0;
+            int flagfor_exit_drone=0;
+            while(flagfor_exit==0)
+            {
+            System.out.print("Enter Drone id : ");  
+            String reportingdrone_id= sc_choice.nextLine();  
+            System.out.print("X coordiante : ");  
+            String location_drone_x= sc_choice.nextLine();  
+            System.out.print("Y coordiante : ");  
+            String location_drone_y= sc_choice.nextLine(); 
+            System.out.print("Fire Severity : ");  
+            String fire_severity= sc_choice.nextLine(); 
+            
+                File file = new File(
+            "D:\\23Term1\\Applied Distributed System\\DroneClientProject\\drone.txt");
+ 
+        BufferedReader br_for_read=null;
+                try {
+                    br_for_read = new BufferedReader(new FileReader(file));
+                } catch (FileNotFoundException ex) {
+                    Logger.getLogger(DroneClientProject.class.getName()).log(Level.SEVERE, null, ex);
+                }
+ 
+        String st__for_readline;
+                try {
+                    while ((st__for_readline = br_for_read.readLine()) != null)
+                    {
+                        // Print the string
+                        
+                        String droneidfromfile=st__for_readline.split("##")[0];
+                        if(droneidfromfile.equalsIgnoreCase(reportingdrone_id))
+                        {
+                            flagfor_exit_drone=1;
+                        }
+                    }    } catch (IOException ex) {
+                    Logger.getLogger(DroneClientProject.class.getName()).log(Level.SEVERE, null, ex);
+                }
+           
+        if(flagfor_exit_drone==0)
+        {
+              System.out.println("Drone with this drone id not found");
+              flagfor_exit=0;
+        }
+        
+        else{
+            flagfor_exit=1;
+        
+         
+            BufferedReader csvReaderDrone=null;
+                try {
+                    csvReaderDrone = new BufferedReader(new FileReader("D:\\23Term1\\Applied Distributed System\\DroneClientProject\\firetest.csv"));
+                } catch (FileNotFoundException ex) {
+                    Logger.getLogger(DroneClientProject.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                String row;
+                int count=1;
+                try {
+                    while ((row = csvReaderDrone.readLine()) != null) {
+                        count++;
+                        
+                    }               } catch (IOException ex) {
+                    Logger.getLogger(DroneClientProject.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                try {
+                    csvReaderDrone.close();
+                } catch (IOException ex) {
+                    Logger.getLogger(DroneClientProject.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+      CSVWriter writer_csv_drone=null;
+                try {
+                    writer_csv_drone = new CSVWriter(new FileWriter("D:\\23Term1\\Applied Distributed System\\DroneClientProject\\firetest.csv", true));
+                } catch (IOException ex) {
+                    Logger.getLogger(DroneClientProject.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+      String [] record = (count+","+reportingdrone_id+","+location_drone_x+","+location_drone_y+","+fire_severity).split(",");
+  
+      writer_csv_drone.writeNext(record);
+
+                try {
+                    writer_csv_drone.close();
+                } catch (IOException ex) {
+                    Logger.getLogger(DroneClientProject.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            System.out.println("fire alert send successfully");
+
+        }
+            }//while flagfor_exit
+        
+        }
+            
+        
+        }
+        
+    }
+}
